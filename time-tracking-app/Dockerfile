@@ -4,14 +4,16 @@ FROM node:22 AS build-stage
 WORKDIR /app
 
 COPY ./time-tracking-app/package*.json ./
+
+RUN cat ./package.json
+
 RUN npm install
 
-COPY ./time-tracking-app/* ./
+COPY ./time-tracking-app/* .
 
 RUN pwd
-RUN echo ls -la
+RUN ls
 
-RUN echo ls -la ./src
 RUN npm run build
 # Stage 2: Serve the application with Nginx
 FROM nginx:alpine
