@@ -102,7 +102,7 @@ jobs:
         run: |
           set -eux
           terraform apply \
-            -var 'github_repository_name=${{ env.ECR_REPO_NAME }}' \
+            -var 'repository_name=${{ env.ECR_REPO_NAME }}' \
             -var 'lifecycle_policy=${{ inputs.lifecycle_policy_file }}' \
             -var 'aws_account_id=${{ inputs.aws_account_id }}' \
             -auto-approve
