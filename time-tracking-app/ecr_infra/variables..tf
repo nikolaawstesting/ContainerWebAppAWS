@@ -38,7 +38,14 @@ variable "aws_account_id" {
   type        = string
 }
 
-variable "repository_name" {
+variable "github_org_name" {
   description = "The name of the ECR repository"
   type        = string
+  default = "nikolaawstesting"
+}
+
+variable "github_repo_name" {
+  description = "The name of the ECR repository"
+  type        = string
+  default = "containerwebappaws"
 }
