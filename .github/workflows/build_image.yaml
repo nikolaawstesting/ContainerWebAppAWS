@@ -65,6 +65,7 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v2
         with:
           role-to-assume: arn:aws:iam::${{ inputs.aws_account_id }}:role/${{ inputs.backend_iam_role }}
+          role-session-name: GitHubActions
           aws-region: ${{ inputs.aws_region }}
 
       - name: Setup Terraform
