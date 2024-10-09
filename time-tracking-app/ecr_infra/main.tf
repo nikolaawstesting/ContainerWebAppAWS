@@ -8,9 +8,6 @@ terraform {
   backend "s3" {
     bucket = "terraformtimethiefresources"
     region = "eu-west-1"
-    assume_role = {
-      role_arn = "arn:aws:iam::054037132472:role/github-actions-role"
-    }
   }
 
 }
