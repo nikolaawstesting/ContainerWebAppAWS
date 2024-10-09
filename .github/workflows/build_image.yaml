@@ -16,7 +16,7 @@ on:
         default: "current"
       lifecycle_policy_file:
         description: Path to the lifecycle policy JSON file (default = 'policy.json')
-        default: "./time-tracking-app/policy.json"
+        default: "../policy.json"
         type: string
       backend_s3_bucket:
         description: Name of the S3bucket for Terraform backend
