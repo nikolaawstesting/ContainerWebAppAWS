@@ -49,3 +49,8 @@ variable "github_repo_name" {
   type        = string
   default = "containerwebappaws"
 }
+# used in build_image pipeline to hold github_org_name_github_repo_name value
+variable "repository_name" {
+  description = "The name of the ECR repository"
+  type        = string
+}
