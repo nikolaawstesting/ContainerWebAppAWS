@@ -3,10 +3,10 @@ FROM node:22 AS build-stage
 
 WORKDIR /app
 
-COPY package*.json ./
+COPY ./time-tracking-app/package*.json ./
 RUN npm install
 
-COPY . .
+COPY ./time-tracking-app/* .
 RUN npm run build
 
 # Stage 2: Serve the application with Nginx
