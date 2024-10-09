@@ -9,7 +9,7 @@ RUN cat ./package.json
 
 RUN npm install
 
-COPY ./time-tracking-app/* .
+COPY ./time-tracking-app/ .
 
 RUN pwd
 RUN ls
