@@ -27,3 +27,13 @@ variable "assume_role_arn" {
   type        = string
   default     = "arn:aws:iam::054037132472:role/github-actions-role"
 }
+
+variable "lifecycle_policy" {
+  type        = string
+  description = "the lifecycle policy to be applied to the ECR repo"
+}
+
+variable "aws_account_id" {
+  description = "Target AWS Account ID"
+  type        = string
+}

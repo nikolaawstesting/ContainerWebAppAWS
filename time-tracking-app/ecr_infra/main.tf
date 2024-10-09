@@ -25,6 +25,11 @@ resource "aws_ecr_repository" "timethief-ecr-1" {
   }
 }
 
+resource "aws_ecr_lifecycle_policy" "name" {
+  repository = aws_ecr_repository.repository.name
+  policy     = templatefile(var.lifecycle_policy, {})
+}
+
 resource "aws_iam_policy_document" "timethief-ecr-iam-document-1" {
   statement {
     sid    ="${var.environment}-${var.project_name}-ecr-iam-policy-1"
