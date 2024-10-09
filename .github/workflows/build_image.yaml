@@ -65,7 +65,6 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v2
         with:
           role-to-assume: arn:aws:iam::${{ inputs.aws_account_id }}:role/${{ inputs.backend_iam_role }}
-          role-session-name: GitHubActions
           aws-region: ${{ inputs.aws_region }}
 
       - name: Setup Terraform
@@ -95,7 +94,7 @@ jobs:
             -backend-config='bucket=${{ inputs.backend_s3_bucket }}' \
             -backend-config='key=docker-ecr/terraform-${{ env.ECR_REPO_NAME }}.tfstate' \
             -backend-config='dynamodb_table=${{ inputs.backend_dynamodb_table }}' \
-            -backend-config='role_arn=arn:aws:iam::${{ inputs.aws_account_id }}:role/${{ inputs.backend_iam_role }}'
+        #-backend-config='role_arn=arn:aws:iam::${{ inputs.aws_account_id }}:role/${{ inputs.backend_iam_role }}'
         working-directory: ./time-tracking-app/ecr_infra
 
       - name: Create ECR repo [TF apply]
@@ -105,9 +104,9 @@ jobs:
           terraform apply \
             -var 'repository_name=${{ env.ECR_REPO_NAME }}' \
             -var 'lifecycle_policy=${{ inputs.lifecycle_policy_file }}' \
-            -var 'iam_role=arn:aws:iam::${{ inputs.aws_account_id }}:role/${{ inputs.github_iam_role }}' \
             -var 'aws_account_id=${{ inputs.aws_account_id }}' \
             -auto-approve
+        #-var 'iam_role=arn:aws:iam::${{ inputs.aws_account_id }}:role/${{ inputs.github_iam_role }}' \
         working-directory: ./time-tracking-app/ecr_infra
 
       - name: Login to Amazon ECR
