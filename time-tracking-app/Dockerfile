@@ -6,9 +6,13 @@ WORKDIR /app
 COPY ./time-tracking-app/package*.json ./
 RUN npm install
 
-COPY ./time-tracking-app/* .
-RUN npm run build
+COPY ./time-tracking-app/* ./
 
+RUN pwd
+RUN echo ls -la
+
+RUN echo ls -la ./src
+RUN npm run build
 # Stage 2: Serve the application with Nginx
 FROM nginx:alpine
 
