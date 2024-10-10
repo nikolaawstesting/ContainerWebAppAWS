@@ -26,6 +26,8 @@ data "aws_availability_zones" "available" {}
 
 resource "aws_vpc" "main" {
   cidr_block = var.vpc_cidr
+  enable_dns_support = true
+  enable_dns_hostnames = true
   tags = {
     Name = "${var.environment}-${var.project_name}-vpc-1"
   }
@@ -75,22 +77,50 @@ resource "aws_route_table_association" "public_association" {
   route_table_id = aws_route_table.public.id
 }
 
-resource "aws_security_group" "ecs" {
-  vpc_id = aws_vpc.main.id
 
-  ingress {
-    from_port   = 443
-    to_port     = 443
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
 
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
+resource "aws_vpc_endpoint" "s3" {
+  vpc_id       = aws_vpc.main.id
+  service_name = "com.amazonaws.${var.region}.s3"
+ vpc_endpoint_type = "Gateway"
+ route_table_ids = [aws_route_table.public.id, aws_route_table.private.id]
+ policy = data.aws_iam_policy_document.s3_ecr_access.json
+
+}
+
+
+resource "aws_vpc_endpoint" "ecr-dkr-endpoint" {
+  vpc_id       = aws_vpc.main.id
+ private_dns_enabled = true
+  service_name = "com.amazonaws.${var.region}.ecr.dkr"
+ vpc_endpoint_type = "Interface"
+ subnet_ids = "${aws_subnet.private.*.id}, ${aws_subnet.public.*.id}"
+
+}
+
+resource "aws_vpc_endpoint" "ecr-api-endpoint" {
+  vpc_id       = aws_vpc.main.id
+  service_name = "com.amazonaws.${var.region}.ecr.api"
+ vpc_endpoint_type = "Interface"
+ private_dns_enabled = true
+  subnet_ids = "${aws_subnet.private.*.id}, ${aws_subnet.public.*.id}"
+}
+resource "aws_vpc_endpoint" "ecs-agent" {
+  vpc_id       = aws_vpc.main.id
+  service_name = "com.amazonaws.${var.region}.ecs-agent"
+ vpc_endpoint_type = "Interface"
+ private_dns_enabled = true
+ subnet_ids = "${aws_subnet.private.*.id}, ${aws_subnet.public.*.id}"
+
+
+}
+resource "aws_vpc_endpoint" "ecs-telemetry" {
+  vpc_id       = aws_vpc.main.id
+  service_name = "com.amazonaws.${var.region}.ecs-telemetry"
+ vpc_endpoint_type = "Interface"
+ private_dns_enabled = true
+ subnet_ids = "${aws_subnet.private.*.id}, ${aws_subnet.public.*.id}"
+
 }
 
 output "vpc_id" {

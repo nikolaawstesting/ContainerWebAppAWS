@@ -193,11 +193,20 @@ resource "aws_lb_listener" "main" {
     protocol          = "HTTPS"
     ssl_policy        = "ELBSecurityPolicy-2016-08"
     certificate_arn   = var.certificate_arn
+    
 
     default_action {
         type             = "forward"
         target_group_arn = aws_lb_target_group.main.arn
     }
+}
+
+resource "aws_route53_record" "alb-record" {
+  zone_id = aws_route53_zone.zone_dev.zone_id
+  name    = "www.gonikola.com"
+  type    = "A"
+  ttl     = 300
+  records = [aws_alb.main.dns_name]
 }
 
 resource "aws_ecs_service" "main" {
@@ -216,6 +225,7 @@ resource "aws_ecs_service" "main" {
         target_group_arn = aws_lb_target_group.main.arn
         container_name   = "${var.environment}-${var.project_name}-container"
         container_port   = 8080
+        
     }
 }
 
