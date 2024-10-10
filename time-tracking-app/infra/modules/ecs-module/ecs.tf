@@ -18,6 +18,21 @@ variable "public_subnet_ids" {
     type        = list(string)
 }
 
+variable "private_subnet_ids" {
+    description = "The private subnet IDs where the ECS tasks will be deployed"
+    type        = list(string)
+}
+
+variable "public_route_table_id" {
+    description = "The route table ID for the ECS resources"
+    type        = string
+}
+
+variable "default_route_table_id" {
+    description = "The default route table ID for the ECS resources"
+    type        = string
+}
+
 variable "ecr_repository_url" {
     description = "The URL of the ECR repository"
     type        = string
@@ -30,6 +45,26 @@ variable "region" {
 
 variable "certificate_arn" {
     description = "The ARN of the ACM certificate"
+    type        = string
+}
+
+variable "zone43_id" {
+    description = "The Route53 zone ID"
+    type        = string
+}
+
+variable "github_org_name" {
+    description = "The name of the GitHub organization"
+    type        = string
+}
+
+variable "github_repo_name" {
+    description = "The name of the GitHub repository"
+    type        = string
+}
+
+variable "repository_url" {
+    description = "The URL of the ECR repository"
     type        = string
 }
 
@@ -139,7 +174,7 @@ resource "aws_ecs_task_definition" "main" {
     container_definitions = jsonencode([
         {
             name      = "${var.environment}-${var.project_name}-container"
-            image     = var.ecr_repository_url
+            image     = "${var.repository_url}${var.github_org_name}_${var.github_repo_name}:current"
             essential = true
             portMappings = [
                 {
@@ -202,11 +237,11 @@ resource "aws_lb_listener" "main" {
 }
 
 resource "aws_route53_record" "alb-record" {
-  zone_id = aws_route53_zone.zone_dev.zone_id
+  zone_id = var.zone43_id
   name    = "www.gonikola.com"
   type    = "A"
   ttl     = 300
-  records = [aws_alb.main.dns_name]
+  records = [aws_lb.main.dns_name]
 }
 
 resource "aws_ecs_service" "main" {
@@ -227,6 +262,52 @@ resource "aws_ecs_service" "main" {
         container_port   = 8080
         
     }
+}
+
+
+resource "aws_vpc_endpoint" "s3" {
+  vpc_id       = var.vpc_id
+  service_name = "com.amazonaws.${var.region}.s3"
+ vpc_endpoint_type = "Gateway"
+ route_table_ids = [var.public_route_table_id, var.default_route_table_id]
+}
+
+
+resource "aws_vpc_endpoint" "ecr-dkr-endpoint" {
+  vpc_id       = var.vpc_id
+ private_dns_enabled = true
+  service_name = "com.amazonaws.${var.region}.ecr.dkr"
+ vpc_endpoint_type = "Interface"
+ security_group_ids = [aws_security_group.ecs_service-sg.id, aws_security_group.alb_service-sg.id]
+ subnet_ids = "${aws_subnet.private.*.id}, ${aws_subnet.public.*.id}"
+
+}
+
+resource "aws_vpc_endpoint" "ecr-api-endpoint" {
+  vpc_id       = aws_vpc.main.id
+  service_name = "com.amazonaws.${var.region}.ecr.api"
+ vpc_endpoint_type = "Interface"
+ private_dns_enabled = true
+ security_group_ids = [aws_security_group.ecs_service-sg.id, aws_security_group.alb_service-sg.id]
+ subnet_ids = "${aws_subnet.private.*.id}, ${aws_subnet.public.*.id}"
+}
+resource "aws_vpc_endpoint" "ecs-agent" {
+  vpc_id       = aws_vpc.main.id
+  service_name = "com.amazonaws.${var.region}.ecs-agent"
+ vpc_endpoint_type = "Interface"
+ private_dns_enabled = true
+ security_group_ids = [aws_security_group.ecs_service-sg.id, aws_security_group.alb_service-sg.id]
+ subnet_ids = "${aws_subnet.private.*.id}, ${aws_subnet.public.*.id}"
+
+
+}
+resource "aws_vpc_endpoint" "ecs-telemetry" {
+  vpc_id       = aws_vpc.main.id
+  service_name = "com.amazonaws.${var.region}.ecs-telemetry"
+ vpc_endpoint_type = "Interface"
+ private_dns_enabled = true
+ security_group_ids = [aws_security_group.ecs_service-sg.id, aws_security_group.alb_service-sg.id]
+ subnet_ids = "${aws_subnet.private.*.id}, ${aws_subnet.public.*.id}"
 }
 
 output "ecs_cluster_id" {

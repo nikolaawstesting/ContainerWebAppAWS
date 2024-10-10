@@ -35,6 +35,13 @@ module "ecs" {
   region = var.region
   vpc_id = module.networking.vpc_id
   public_subnet_ids = module.networking.public_subnet_ids
+  private_subnet_ids = module.networking.private_subnet_ids
+  public_route_table_id = module.networking.public_route_table_id
+  default_route_table_id = module.networking.default_route_table_id
   ecr_repository_url = var.repository_url
   certificate_arn = var.certificate_arn
+  zone43_id = var.zone43_id
+  github_org_name = var.github_org_name
+  github_repo_name = var.github_repo_name
+  repository_url = var.repository_url
 }

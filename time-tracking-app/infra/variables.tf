@@ -58,9 +58,28 @@ variable "assume_role_arn" {
   default     = "arn:aws:iam::054037132472:role/github-actions-role"
 }
 
+variable "github_org_name" {
+  description = "The name of the ECR repository"
+  type        = string
+  default     = "nikolaawstesting"
+}
+
+variable "github_repo_name" {
+  description = "The name of the ECR repository"
+  type        = string
+  default     = "containerwebappaws"
+}
+
+
 variable "repository_url" {
   description = "The URL of the ECR repository"
   type        = string
-  default     = "054037132472.dkr.ecr.eu-west-1.amazonaws.com/timethief"
+  default     = "054037132472.dkr.ecr.eu-west-1.amazonaws.com/"
+}
+
+variable "zone43_id" {
+  description = "The Route53 zone ID"
+  type        = string
+  default     = "Z3VQ1Q3Q2QZL6T"
 }
 
