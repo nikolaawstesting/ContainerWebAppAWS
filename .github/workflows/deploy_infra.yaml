@@ -47,6 +47,20 @@ jobs:
             -backend-config='dynamodb_table=${{ vars.infra_dynamodb_table }}' \
         working-directory: ./time-tracking-app/infra
 
+      - name: TF plan
+        shell: bash
+        run: |
+          set -eux
+          terraform plan -upgrade -reconfigure \
+            -backend-config='skip_metadata_api_check=true' \
+            -backend-config='skip_region_validation=true' \
+            -backend-config='skip_credentials_validation=true' \
+            -backend-config='region=${{ vars.aws_region }}' \
+            -backend-config='bucket=${{ vars.backend_s3_bucket }}' \
+            -backend-config='key=timethief-app/terraform-infra.tfstate' \
+            -backend-config='dynamodb_table=${{ vars.infra_dynamodb_table }}' \
+        working-directory: ./time-tracking-app/infra
+
   deploy:
     name: TF deploy
     needs: plan
@@ -58,6 +72,9 @@ jobs:
       contents: read
 
     steps:
+    
+      - uses: actions/checkout@v3
+      
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v2
         with:
