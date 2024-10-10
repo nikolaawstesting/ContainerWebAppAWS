@@ -1,0 +1,121 @@
+name: Infrastructure deployment
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ["./time-tracking-app/infra/**"]
+
+  pull_request:
+    branches: [main]
+    paths: ["./time-tracking-app/infra/**"]
+
+    inputs:
+      backend_s3_bucket:
+        description: Name of the S3bucket for Terraform backend
+        default: "terraformtimethiefresources"
+        type: string
+      backend_iam_role:
+        description: Name of the Terraform backend assumable IAM Role
+        default: "github-actions-role"
+        type: string
+      github_iam_role:
+        description: Name of the IAM Role for adding access to ECR repo
+        default: "github-actions-role"
+        type: string
+      aws_account_id:
+        description: AWS Account ID
+        type: string
+        default: "054037132472"
+      aws_region:
+        description: Target AWS Region
+        default: "eu-west-1"
+        type: string
+      backend_dynamodb_table:
+        description: DynamoDB table for State lock
+        default: "terraform-infra-ddb"
+        type: string
+
+jobs:
+  plan:
+    name: Terraform plan
+    runs-on: ubuntu-24.04
+
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          role-to-assume: arn:aws:iam::${{ inputs.aws_account_id }}:role/${{ inputs.backend_iam_role }}
+          aws-region: ${{ inputs.aws_region }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_wrapper: false
+
+      - name: TF init
+        shell: bash
+        run: |
+          set -eux
+          terraform init -upgrade -reconfigure \
+            -backend-config='skip_metadata_api_check=true' \
+            -backend-config='skip_region_validation=true' \
+            -backend-config='skip_credentials_validation=true' \
+            -backend-config='region=${{ inputs.aws_region }}' \
+            -backend-config='bucket=${{ inputs.backend_s3_bucket }}' \
+            -backend-config='key=timethief-app/terraform-infra.tfstate' \
+            -backend-config='dynamodb_table=${{ inputs.backend_dynamodb_table }}' \
+        working-directory: ./time-tracking-app/infra
+
+  deploy:
+    name: TF deploy
+    needs: plan
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          role-to-assume: arn:aws:iam::${{ inputs.aws_account_id }}:role/${{ inputs.backend_iam_role }}
+          aws-region: ${{ inputs.aws_region }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_wrapper: false
+
+      - name: TF init
+        shell: bash
+        run: |
+          set -eux
+          terraform init -upgrade -reconfigure \
+            -backend-config='skip_metadata_api_check=true' \
+            -backend-config='skip_region_validation=true' \
+            -backend-config='skip_credentials_validation=true' \
+            -backend-config='region=${{ inputs.aws_region }}' \
+            -backend-config='bucket=${{ inputs.backend_s3_bucket }}' \
+            -backend-config='key=timethief-app/terraform-infra.tfstate' \
+            -backend-config='dynamodb_table=${{ inputs.backend_dynamodb_table }}' \
+        #-backend-config='role_arn=arn:aws:iam::${{ inputs.aws_account_id }}:role/${{ inputs.backend_iam_role }}'
+        working-directory: ./time-tracking-app/infra
+
+      - name: TF apply
+        shell: bash
+        run: |
+          set -eux
+          terraform apply \
+            -var 'aws_account_id=${{ inputs.aws_account_id }}' \
+            -auto-approve
+        #-var 'iam_role=arn:aws:iam::${{ inputs.aws_account_id }}:role/${{ inputs.github_iam_role }}' \
+        working-directory: ./time-tracking-app/infra
