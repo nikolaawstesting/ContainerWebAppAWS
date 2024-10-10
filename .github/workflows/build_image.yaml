@@ -1,57 +1,6 @@
 name: Docker image build and publish
 on:
   workflow_dispatch:
-    inputs:
-      path_to_dockerfile:
-        description: Path to the dockerfile (default = 'Dockerfile')
-        default: "./time-tracking-app/Dockerfile"
-        type: string
-        required: false
-      docker_build_dir:
-        description: Docker build directory (default = '.')
-        default: "."
-        type: string
-        required: false
-      image_tag:
-        description: Tag to apply to images.
-        type: string
-        default: "current"
-        required: false
-      lifecycle_policy_file:
-        description: Path to the lifecycle policy JSON file (default = 'policy.json')
-        default: "../policy.json"
-        type: string
-        required: false
-      backend_s3_bucket:
-        description: Name of the S3bucket for Terraform backend
-        default: "terraformtimethiefresources"
-        type: string
-        required: false
-      backend_iam_role:
-        description: Name of the Terraform backend assumable IAM Role
-        default: "github-actions-role"
-        type: string
-        required: false
-      hub_iam_role:
-        description: Name of the IAM Role for adding access to ECR repo
-        default: "github-actions-role"
-        type: string
-        required: false
-      aws_account_id:
-        description: AWS Account ID
-        type: string
-        default: "054037132472"
-        required: false
-      aws_region:
-        description: Target AWS Region
-        default: "eu-west-1"
-        type: string
-        required: false
-      ecr_infra_dynamodb_table:
-        description: DynamoDB table for State lock
-        default: "terraform-backend-ddb"
-        type: string
-        required: false
 
 # concurrency required to avoid terraform lock contention during ECR provisioning
 concurrency: ci-${{ github.repository }}-docker-pipeline
@@ -74,8 +23,8 @@ jobs:
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v2
         with:
-          role-to-assume: arn:aws:iam::${{ inputs.aws_account_id }}:role/${{ inputs.backend_iam_role }}
-          aws-region: ${{ inputs.aws_region }}
+          role-to-assume: arn:aws:iam::${{ vars.aws_account_id }}:role/${{ vars.backend_iam_role }}
+          aws-region: ${{ vars.aws_region }}
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2
@@ -100,11 +49,11 @@ jobs:
             -backend-config='skip_metadata_api_check=true' \
             -backend-config='skip_region_validation=true' \
             -backend-config='skip_credentials_validation=true' \
-            -backend-config='region=${{ inputs.aws_region }}' \
-            -backend-config='bucket=${{ inputs.backend_s3_bucket }}' \
+            -backend-config='region=${{ vars.aws_region }}' \
+            -backend-config='bucket=${{ vars.backend_s3_bucket }}' \
             -backend-config='key=docker-ecr/terraform-${{ env.ECR_REPO_NAME }}.tfstate' \
-            -backend-config='dynamodb_table=${{ inputs.ecr_infra_dynamodb_table }}' \
-        #-backend-config='role_arn=arn:aws:iam::${{ inputs.aws_account_id }}:role/${{ inputs.backend_iam_role }}'
+            -backend-config='dynamodb_table=${{ vars.ecr_infra_dynamodb_table }}' \
+        #-backend-config='role_arn=arn:aws:iam::${{ vars.aws_account_id }}:role/${{ vars.backend_iam_role }}'
         working-directory: ./time-tracking-app/ecr_infra
 
       - name: Create ECR repo [TF apply]
@@ -113,17 +62,17 @@ jobs:
           set -eux
           terraform apply \
             -var 'repository_name=${{ env.ECR_REPO_NAME }}' \
-            -var 'lifecycle_policy=${{ inputs.lifecycle_policy_file }}' \
-            -var 'aws_account_id=${{ inputs.aws_account_id }}' \
+            -var 'lifecycle_policy=${{ vars.lifecycle_policy_file }}' \
+            -var 'aws_account_id=${{ vars.aws_account_id }}' \
             -auto-approve
-        #-var 'iam_role=arn:aws:iam::${{ inputs.aws_account_id }}:role/${{ inputs.hub_iam_role }}' \
+        #-var 'iam_role=arn:aws:iam::${{ vars.aws_account_id }}:role/${{ vars.hub_iam_role }}' \
         working-directory: ./time-tracking-app/ecr_infra
 
       - name: Login to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
         with:
-          registries: ${{ inputs.aws_account_id }}
+          registries: ${{ vars.aws_account_id }}
 
       - name: Build, tag, and push image to Amazon ECR
         id: build-publish
@@ -131,9 +80,9 @@ jobs:
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           ECR_REPOSITORY: ${{ env.ECR_REPO_NAME }}
-          IMAGE_TAG: ${{ inputs.image_tag }}
+          IMAGE_TAG: ${{ vars.image_tag }}
         run: |
-          docker build "${{ inputs.docker_build_dir }}" -f "${{ inputs.path_to_dockerfile }}" -t "$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
+          docker build "${{ vars.docker_build_dir }}" -f "${{ vars.path_to_dockerfile }}" -t "$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
           docker push "$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
           echo "IMAGE $IMAGE_TAG is pushed to $ECR_REGISTRY/$ECR_REPOSITORY"
           echo "image_tag=$IMAGE_TAG" 
