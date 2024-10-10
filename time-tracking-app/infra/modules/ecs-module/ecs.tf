@@ -82,8 +82,8 @@ resource "aws_iam_role_policy" "ecs_task_execution_policy" {
     })
 }
 
-resource "aws_security_group" "alb_service" {
-    name        = "${var.environment}-${var.project_name}-ecs-sg"
+resource "aws_security_group" "alb_service-sg" {
+    name        = "${var.environment}-${var.project_name}-alb-sg-01"
     description = "Security group for ECS service"
     vpc_id      = var.vpc_id
 
@@ -102,8 +102,8 @@ resource "aws_security_group" "alb_service" {
     }
 }
 
-resource "aws_security_group" "ecs_service" {
-    name        = "${var.environment}-${var.project_name}-ecs-sg"
+resource "aws_security_group" "ecs_service-sg" {
+    name        = "${var.environment}-${var.project_name}-ecs-sg-01"
     description = "Security group for ECS service"
     vpc_id      = var.vpc_id
 
