@@ -282,7 +282,7 @@ resource "aws_ecs_service" "main" {
 #  private_dns_enabled = true
 #  security_group_ids = [aws_security_group.ecs_service-sg.id, aws_security_group.alb_service-sg.id]
 #  subnet_ids = "${var.private_subnet_ids.*}, ${var.public_subnet_ids.*}"
-}
+#}
 
 output "ecs_cluster_id" {
     description = "The ID of the ECS cluster"
