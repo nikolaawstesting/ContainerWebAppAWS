@@ -6,42 +6,52 @@ on:
         description: Path to the dockerfile (default = 'Dockerfile')
         default: "./time-tracking-app/Dockerfile"
         type: string
+        required: false
       docker_build_dir:
         description: Docker build directory (default = '.')
         default: "."
         type: string
+        required: false
       image_tag:
         description: Tag to apply to images.
         type: string
         default: "current"
+        required: false
       lifecycle_policy_file:
         description: Path to the lifecycle policy JSON file (default = 'policy.json')
         default: "../policy.json"
         type: string
+        required: false
       backend_s3_bucket:
         description: Name of the S3bucket for Terraform backend
         default: "terraformtimethiefresources"
         type: string
+        required: false
       backend_iam_role:
         description: Name of the Terraform backend assumable IAM Role
         default: "github-actions-role"
         type: string
-      github_iam_role:
+        required: false
+      hub_iam_role:
         description: Name of the IAM Role for adding access to ECR repo
         default: "github-actions-role"
         type: string
+        required: false
       aws_account_id:
         description: AWS Account ID
         type: string
         default: "054037132472"
+        required: false
       aws_region:
         description: Target AWS Region
         default: "eu-west-1"
         type: string
-      backend_dynamodb_table:
+        required: false
+      ecr_infra_dynamodb_table:
         description: DynamoDB table for State lock
         default: "terraform-backend-ddb"
         type: string
+        required: false
 
 # concurrency required to avoid terraform lock contention during ECR provisioning
 concurrency: ci-${{ github.repository }}-docker-pipeline
@@ -93,7 +103,7 @@ jobs:
             -backend-config='region=${{ inputs.aws_region }}' \
             -backend-config='bucket=${{ inputs.backend_s3_bucket }}' \
             -backend-config='key=docker-ecr/terraform-${{ env.ECR_REPO_NAME }}.tfstate' \
-            -backend-config='dynamodb_table=${{ inputs.backend_dynamodb_table }}' \
+            -backend-config='dynamodb_table=${{ inputs.ecr_infra_dynamodb_table }}' \
         #-backend-config='role_arn=arn:aws:iam::${{ inputs.aws_account_id }}:role/${{ inputs.backend_iam_role }}'
         working-directory: ./time-tracking-app/ecr_infra
 
@@ -106,7 +116,7 @@ jobs:
             -var 'lifecycle_policy=${{ inputs.lifecycle_policy_file }}' \
             -var 'aws_account_id=${{ inputs.aws_account_id }}' \
             -auto-approve
-        #-var 'iam_role=arn:aws:iam::${{ inputs.aws_account_id }}:role/${{ inputs.github_iam_role }}' \
+        #-var 'iam_role=arn:aws:iam::${{ inputs.aws_account_id }}:role/${{ inputs.hub_iam_role }}' \
         working-directory: ./time-tracking-app/ecr_infra
 
       - name: Login to Amazon ECR
