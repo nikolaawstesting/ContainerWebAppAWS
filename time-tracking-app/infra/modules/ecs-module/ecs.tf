@@ -111,7 +111,7 @@ resource "aws_security_group" "ecs_service-sg" {
         from_port   = 8080
         to_port     = 8080
         protocol    = "tcp"
-        security_groups = [aws_security_group.alb_service.id]
+        security_groups = [aws_security_group.alb_service-sg.id]
     }
 
     egress {
@@ -164,7 +164,7 @@ resource "aws_lb" "main" {
     name               = "${var.environment}-${var.project_name}-alb"
     internal           = false
     load_balancer_type = "application"
-    security_groups    = [aws_security_group.alb_service.id]
+    security_groups    = [aws_security_group.alb_service-sg.id]
     subnets            = var.public_subnet_ids
 }
 
@@ -209,7 +209,7 @@ resource "aws_ecs_service" "main" {
 
     network_configuration {
         subnets         = var.public_subnet_ids
-        security_groups = [aws_security_group.ecs_service.id]
+        security_groups = [aws_security_group.ecs_service-sg.id]
     }
 
     load_balancer {
