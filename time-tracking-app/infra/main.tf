@@ -7,12 +7,7 @@ terraform {
   }
   backend "s3" {
     bucket = "terraformtimethiefresources"
-    key    = "time-tracking-app/infra"
     region = "eu-west-1"
-    dynamodb_table = "terraform-backend-ddb"
-    assume_role = {
-      role_arn = "arn:aws:iam::054037132472:role/github-actions-role"
-    }
   }
 
 }
