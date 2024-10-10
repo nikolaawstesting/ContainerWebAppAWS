@@ -90,10 +90,6 @@ output "private_subnet_ids" {
   value = aws_subnet.private[*].id
 }
 
-output "security_group_id" {
-  value = aws_security_group.ecs.id
-}
-
 output "public_route_table_id" {
   value = aws_route_table.public.id
 }
