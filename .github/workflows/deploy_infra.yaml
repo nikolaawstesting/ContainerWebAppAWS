@@ -5,11 +5,11 @@ on:
 
   push:
     branches: [main]
-    paths: ["./time-tracking-app/infra/**"]
+    paths: ["./time-tracking-app/infra/*"]
 
   pull_request:
     branches: [main]
-    paths: ["./time-tracking-app/infra/**"]
+    paths: ["./time-tracking-app/infra/*"]
 
 jobs:
   plan:
