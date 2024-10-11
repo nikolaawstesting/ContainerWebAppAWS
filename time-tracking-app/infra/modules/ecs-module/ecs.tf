@@ -240,7 +240,6 @@ resource "aws_route53_record" "alb-record" {
   zone_id = var.zone43_id
   name    = "gonikola.com"
   type    = "A"
-  ttl     = 300
   alias {
     name    = aws_lb.main.dns_name
     zone_id = aws_lb.main.zone_id
