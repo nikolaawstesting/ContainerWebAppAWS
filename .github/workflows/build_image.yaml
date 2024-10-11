@@ -50,14 +50,6 @@ jobs:
         shell: bash
         run: |
           set -eux
-          pwd
-          ls
-          cd ..
-          pwd
-          ls
-          cd ..
-          pwd
-          ls
           terraform init -upgrade -reconfigure \
             -backend-config='skip_metadata_api_check=true' \
             -backend-config='skip_region_validation=true' \
