@@ -265,24 +265,51 @@ resource "aws_ecs_service" "main" {
 }
 
 
-# resource "aws_vpc_endpoint" "ecs-agent" {
-#   vpc_id       = var.vpc_id
-#   service_name = "com.amazonaws.${var.region}.ecs-agent"
-#  vpc_endpoint_type = "Interface"
-#  private_dns_enabled = true
-#  security_group_ids = [aws_security_group.ecs_service-sg.id, aws_security_group.alb_service-sg.id]
-#  subnet_ids = "${var.private_subnet_ids.*}, ${var.public_subnet_ids.*}"
+resource "aws_vpc_endpoint" "s3" {
+  vpc_id       = var.vpc_id
+  service_name = "com.amazonaws.${var.region}.s3"
+ vpc_endpoint_type = "Gateway"
+ route_table_ids = [var.public_route_table_id, var.default_route_table_id]
+}
 
 
-# }
-# resource "aws_vpc_endpoint" "ecs-telemetry" {
-#   vpc_id       = var.vpc_id
-#   service_name = "com.amazonaws.${var.region}.ecs-telemetry"
-#  vpc_endpoint_type = "Interface"
-#  private_dns_enabled = true
-#  security_group_ids = [aws_security_group.ecs_service-sg.id, aws_security_group.alb_service-sg.id]
-#  subnet_ids = "${var.private_subnet_ids.*}, ${var.public_subnet_ids.*}"
-#}
+resource "aws_vpc_endpoint" "ecr-dkr-endpoint" {
+  vpc_id       = var.vpc_id
+ private_dns_enabled = true
+  service_name = "com.amazonaws.${var.region}.ecr.dkr"
+ vpc_endpoint_type = "Interface"
+ security_group_ids = [aws_security_group.ecs_service-sg.id, aws_security_group.alb_service-sg.id]
+ subnet_ids = concat(var.private_subnet_ids, var.public_subnet_ids)
+
+}
+
+resource "aws_vpc_endpoint" "ecr-api-endpoint" {
+  vpc_id       = var.vpc_id
+  service_name = "com.amazonaws.${var.region}.ecr.api"
+ vpc_endpoint_type = "Interface"
+ private_dns_enabled = true
+ security_group_ids = [aws_security_group.ecs_service-sg.id, aws_security_group.alb_service-sg.id]
+ subnet_ids = concat(var.private_subnet_ids, var.public_subnet_ids)
+
+}
+resource "aws_vpc_endpoint" "ecs-agent" {
+  vpc_id       = var.vpc_id
+  service_name = "com.amazonaws.${var.region}.ecs-agent"
+ vpc_endpoint_type = "Interface"
+ private_dns_enabled = true
+ security_group_ids = [aws_security_group.ecs_service-sg.id, aws_security_group.alb_service-sg.id]
+ subnet_ids = concat(var.private_subnet_ids, var.public_subnet_ids)
+}
+
+resource "aws_vpc_endpoint" "ecs-telemetry" {
+  vpc_id       = var.vpc_id
+  service_name = "com.azmazonaws.${var.region}.ecs-telemetry"
+ vpc_endpoint_type = "Interface"
+ private_dns_enabled = true
+ security_group_ids = [aws_security_group.ecs_service-sg.id, aws_security_group.alb_service-sg.id]
+ subnet_ids = concat(var.private_subnet_ids, var.public_subnet_ids)
+
+}
 
 output "ecs_cluster_id" {
     description = "The ID of the ECS cluster"
