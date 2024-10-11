@@ -37,7 +37,7 @@ jobs:
             -backend-config='bucket=${{ vars.backend_s3_bucket }}' \
             -backend-config='key=timethief-app/terraform-infra.tfstate' \
             -backend-config='dynamodb_table=${{ vars.infra_dynamodb_table }}' \
-        working-directory: vars.infra_path
+        working-directory: ./time-tracking-app/infra
 
       - name: TF destroy
         shell: bash
@@ -45,4 +45,4 @@ jobs:
           set -eux
           terraform destroy \
             -auto-approve
-        working-directory: vars.infra_path
+        working-directory: ./time-tracking-app/infra
