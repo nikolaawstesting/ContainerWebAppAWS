@@ -238,9 +238,14 @@ resource "aws_lb_listener" "main" {
 
 resource "aws_route53_record" "alb-record" {
   zone_id = var.zone43_id
-  name    = "www.gonikola.com"
+  name    = "gonikola.com"
   type    = "A"
   ttl     = 300
+  alias {
+    name    = aws_lb.main.dns_name
+    zone_id = aws_lb.main.zone_id
+    evaluate_target_health = true
+  }
   records = [aws_lb.main.dns_name]
 }
 
@@ -303,7 +308,7 @@ resource "aws_vpc_endpoint" "ecs-agent" {
 
 resource "aws_vpc_endpoint" "ecs-telemetry" {
   vpc_id       = var.vpc_id
-  service_name = "com.azmazonaws.${var.region}.ecs-telemetry"
+  service_name = "com.amazonaws.${var.region}.ecs-telemetry"
  vpc_endpoint_type = "Interface"
  private_dns_enabled = true
  security_group_ids = [aws_security_group.ecs_service-sg.id, aws_security_group.alb_service-sg.id]
