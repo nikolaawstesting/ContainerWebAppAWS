@@ -4,16 +4,16 @@ variable "project_name" {
     default     = "timethief"
 }
 
-variable "region" {
-    description = "The AWS region to deploy resources in"
-    type        = string
-    default     = "eu-west-1"
-}
-
 variable "environment" {
     description = "The environment to deploy resources in"
     type        = string
     default     = "dev"
+}
+
+variable "region" {
+    description = "The AWS region to deploy resources in"
+    type        = string
+    default     = "eu-west-1"
 }
 
 variable backend_bucket_name {
@@ -77,16 +77,16 @@ variable "repository_url" {
   default     = "054037132472.dkr.ecr.eu-west-1.amazonaws.com/"
 }
 
-variable "zone43_id" {
-  description = "The Route53 zone ID"
-  type        = string
-  default     = "Z04273732ECIZDWHL4OEF"
-}
-
 variable "container_version" {
   description = "The version of the container"
   type        = string
   default     = "v7"
+}
+
+variable "zone43_id" {
+  description = "The Route53 zone ID"
+  type        = string
+  default     = "Z04273732ECIZDWHL4OEF"
 }
 
 

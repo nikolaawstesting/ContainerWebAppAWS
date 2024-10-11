@@ -8,6 +8,11 @@ variable "environment" {
     type        = string
 }
 
+variable "region" {
+    description = "The AWS region"
+    type        = string
+}
+
 variable "vpc_id" {
     description = "The VPC ID where the ECS cluster will be deployed"
     type        = string
@@ -35,11 +40,6 @@ variable "default_route_table_id" {
 
 variable "ecr_repository_url" {
     description = "The URL of the ECR repository"
-    type        = string
-}
-
-variable "region" {
-    description = "The AWS region"
     type        = string
 }
 
@@ -73,10 +73,8 @@ variable "container_version" {
     type        = string
 }
 
-
-resource "aws_ecs_cluster" "main" {
-    name = "${var.environment}-${var.project_name}-ecs-cluster"
-}
+###########################################################################
+###########################################################################
 
 resource "aws_iam_role" "ecs_task_execution_role" {
     name = "${var.environment}-${var.project_name}-ecs-task-execution-role"
@@ -98,6 +96,7 @@ resource "aws_iam_role" "ecs_task_execution_role" {
         "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
     ]
 }
+
 
 resource "aws_iam_role_policy" "ecs_task_execution_policy" {
     name = "${var.environment}-${var.project_name}-ecs-task-execution-policy"
@@ -122,6 +121,7 @@ resource "aws_iam_role_policy" "ecs_task_execution_policy" {
     })
 }
 
+
 resource "aws_security_group" "alb_service-sg" {
     name        = "${var.environment}-${var.project_name}-alb-sg-01"
     description = "Security group for ECS service"
@@ -141,6 +141,7 @@ resource "aws_security_group" "alb_service-sg" {
         cidr_blocks = ["0.0.0.0/0"]
     }
 }
+
 
 resource "aws_security_group" "ecs_service-sg" {
     name        = "${var.environment}-${var.project_name}-ecs-sg-01"
@@ -162,9 +163,15 @@ resource "aws_security_group" "ecs_service-sg" {
     }
 }
 
+
 resource "aws_cloudwatch_log_group" "ecs" {
     name              = "/ecs/${var.environment}-${var.project_name}"
     retention_in_days = 1
+}
+
+
+resource "aws_ecs_cluster" "main" {
+    name = "${var.environment}-${var.project_name}-ecs-cluster"
 }
 
 resource "aws_ecs_task_definition" "main" {
@@ -241,16 +248,6 @@ resource "aws_lb_listener" "main" {
     }
 }
 
-resource "aws_route53_record" "alb-record" {
-  zone_id = var.zone43_id
-  name    = "www"
-  type    = "A"
-  alias {
-    name    = aws_lb.main.dns_name
-    zone_id = aws_lb.main.zone_id
-    evaluate_target_health = true
-  }
-}
 
 resource "aws_ecs_service" "main" {
     name            = "${var.environment}-${var.project_name}-service"
@@ -271,6 +268,18 @@ resource "aws_ecs_service" "main" {
         container_port   = 8080
         
     }
+}
+
+
+resource "aws_route53_record" "alb-record" {
+  zone_id = var.zone43_id
+  name    = "www"
+  type    = "A"
+  alias {
+    name    = aws_lb.main.dns_name
+    zone_id = aws_lb.main.zone_id
+    evaluate_target_health = true
+  }
 }
 
 

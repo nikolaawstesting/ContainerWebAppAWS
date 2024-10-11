@@ -2,11 +2,11 @@ variable "project_name" {
   type        = string
 }
 
-variable "region" {
+variable "environment" {
   type        = string
 }
 
-variable "environment" {
+variable "region" {
   type        = string
 }
 
@@ -24,6 +24,9 @@ variable "private_subnet_cidrs" {
 
 data "aws_availability_zones" "available" {}
 
+###########################################################################
+###########################################################################
+
 resource "aws_vpc" "main" {
   cidr_block = var.vpc_cidr
   enable_dns_support = true
@@ -32,6 +35,7 @@ resource "aws_vpc" "main" {
     Name = "${var.environment}-${var.project_name}-vpc-1"
   }
 }
+
 
 resource "aws_subnet" "public" {
   count             = length(var.public_subnet_cidrs)
@@ -43,6 +47,7 @@ resource "aws_subnet" "public" {
   }
 }
 
+
 resource "aws_subnet" "private" {
   count             = length(var.private_subnet_cidrs)
   vpc_id            = aws_vpc.main.id
@@ -53,12 +58,14 @@ resource "aws_subnet" "private" {
   }
 }
 
+
 resource "aws_internet_gateway" "main" {
   vpc_id = aws_vpc.main.id
   tags = {
     Name = "${var.environment}-${var.project_name}-ig"
   }
 }
+
 
 resource "aws_route_table" "public" {
   vpc_id = aws_vpc.main.id
@@ -71,11 +78,13 @@ resource "aws_route_table" "public" {
     }
 }
 
+
 resource "aws_route_table_association" "public_association" {
   count          = length(aws_subnet.public)
   subnet_id      = aws_subnet.public[count.index].id
   route_table_id = aws_route_table.public.id
 }
+
 
 
 output "vpc_id" {

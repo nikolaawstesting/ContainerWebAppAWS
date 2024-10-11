@@ -17,6 +17,9 @@ locals {
   account-id = data.aws_caller_identity.current.account_id
 }
 
+###########################################################################
+###########################################################################
+
 resource "aws_ecr_repository" "timethief-ecr-1" {
   name      = "${var.github_org_name}_${var.github_repo_name}"
   image_tag_mutability = "MUTABLE"
@@ -26,10 +29,12 @@ resource "aws_ecr_repository" "timethief-ecr-1" {
   }
 }
 
+
 resource "aws_ecr_lifecycle_policy" "name" {
   repository = aws_ecr_repository.timethief-ecr-1.name
   policy     = templatefile(var.lifecycle_policy, {})
 }
+
 
 data "aws_iam_policy_document" "timethief-ecr-iam-document-1" {
   statement {
