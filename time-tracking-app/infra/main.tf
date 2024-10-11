@@ -44,4 +44,5 @@ module "ecs" {
   github_org_name = var.github_org_name
   github_repo_name = var.github_repo_name
   repository_url = var.repository_url
+  container_version = var.container_version
 }

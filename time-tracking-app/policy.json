@@ -5,7 +5,7 @@
         "description": "Keep last 2 images",
         "selection": {
           "tagStatus": "tagged",
-          "tagPrefixList": [ "current" ],
+          "tagPrefixList": [ "" ],
           "countType": "imageCountMoreThan",
           "countNumber": 2
         },
