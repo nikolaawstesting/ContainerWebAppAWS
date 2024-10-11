@@ -245,7 +245,6 @@ resource "aws_route53_record" "alb-record" {
     zone_id = aws_lb.main.zone_id
     evaluate_target_health = true
   }
-  records = [aws_lb.main.dns_name]
 }
 
 resource "aws_ecs_service" "main" {
