@@ -13,7 +13,7 @@ on:
 
 jobs:
   plan:
-    runs-on: vars.runner_os
+    runs-on: ubuntu-24.04
 
     permissions:
       id-token: write
@@ -58,7 +58,7 @@ jobs:
     name: TF deploy
     needs: plan
     if: github.ref == 'refs/heads/main'
-    runs-on: vars.runner_os
+    runs-on: ubuntu-24.04
 
     permissions:
       id-token: write

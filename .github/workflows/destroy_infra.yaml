@@ -5,7 +5,7 @@ on:
 
 jobs:
   plan:
-    runs-on: vars.runner_os
+    runs-on: ubuntu-24.04
 
     permissions:
       id-token: write
