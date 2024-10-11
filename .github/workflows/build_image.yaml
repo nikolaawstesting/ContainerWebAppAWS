@@ -65,6 +65,14 @@ jobs:
         shell: bash
         run: |
           set -eux
+          pwd
+          ls
+          cd ..
+          pwd
+          ls
+          cd ..
+          pwd
+          ls
           terraform apply \
             -var 'repository_name=${{ env.ECR_REPO_NAME }}' \
             -var 'lifecycle_policy=${{ vars.lifecycle_policy_file }}' \
