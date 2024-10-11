@@ -1,4 +1,4 @@
-name: Infrastructure deployment
+name: deploy infrastructure
 
 on:
   workflow_dispatch:
@@ -13,7 +13,7 @@ on:
 
 jobs:
   plan:
-    runs-on: ubuntu-24.04
+    runs-on: vars.runner_os
 
     permissions:
       id-token: write
@@ -45,20 +45,20 @@ jobs:
             -backend-config='bucket=${{ vars.backend_s3_bucket }}' \
             -backend-config='key=timethief-app/terraform-infra.tfstate' \
             -backend-config='dynamodb_table=${{ vars.infra_dynamodb_table }}' \
-        working-directory: ./time-tracking-app/infra
+        working-directory: vars.infra_path
 
       - name: TF plan
         shell: bash
         run: |
           set -eux
           terraform plan
-        working-directory: ./time-tracking-app/infra
+        working-directory: vars.infra_path
 
   deploy:
     name: TF deploy
     needs: plan
     if: github.ref == 'refs/heads/main'
-    runs-on: ubuntu-24.04
+    runs-on: vars.runner_os
 
     permissions:
       id-token: write
@@ -92,7 +92,7 @@ jobs:
             -backend-config='key=timethief-app/terraform-infra.tfstate' \
             -backend-config='dynamodb_table=${{ vars.infra_dynamodb_table }}' \
         #-backend-config='role_arn=arn:aws:iam::${{ vars.aws_account_id }}:role/${{ vars.backend_iam_role }}'
-        working-directory: ./time-tracking-app/infra
+        working-directory: vars.infra_path
 
       - name: TF apply
         shell: bash
@@ -100,4 +100,4 @@ jobs:
           set -eux
           terraform apply \
             -auto-approve
-        working-directory: ./time-tracking-app/infra
+        working-directory: vars.infra_path

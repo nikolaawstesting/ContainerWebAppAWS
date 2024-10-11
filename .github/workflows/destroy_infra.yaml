@@ -1,11 +1,11 @@
-name: Infrastructure destruction
+name: destroy infrastructure
 
 on:
   workflow_dispatch:
 
 jobs:
   plan:
-    runs-on: ubuntu-24.04
+    runs-on: vars.runner_os
 
     permissions:
       id-token: write
@@ -37,7 +37,7 @@ jobs:
             -backend-config='bucket=${{ vars.backend_s3_bucket }}' \
             -backend-config='key=timethief-app/terraform-infra.tfstate' \
             -backend-config='dynamodb_table=${{ vars.infra_dynamodb_table }}' \
-        working-directory: ./time-tracking-app/infra
+        working-directory: vars.infra_path
 
       - name: TF destroy
         shell: bash
@@ -45,4 +45,4 @@ jobs:
           set -eux
           terraform destroy \
             -auto-approve
-        working-directory: ./time-tracking-app/infra
+        working-directory: vars.infra_path

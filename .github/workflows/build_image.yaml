@@ -1,4 +1,4 @@
-name: Docker image build and publish
+name: build and publish docker image
 
 on:
   workflow_dispatch:
@@ -11,8 +11,8 @@ on:
 concurrency: ci-${{ github.repository }}-docker-pipeline
 
 jobs:
-  docker:
-    runs-on: ubuntu-24.04
+  build-publish:
+    runs-on: vars.runner_os
 
     permissions:
       id-token: write
@@ -59,7 +59,7 @@ jobs:
             -backend-config='key=docker-ecr/terraform-${{ env.ECR_REPO_NAME }}.tfstate' \
             -backend-config='dynamodb_table=${{ vars.ecr_infra_dynamodb_table }}' \
         #-backend-config='role_arn=arn:aws:iam::${{ vars.aws_account_id }}:role/${{ vars.backend_iam_role }}'
-        working-directory: ./time-tracking-app/ecr_infra
+        working-directory: vars.ecr_infra_path
 
       - name: Create ECR repo [TF apply]
         shell: bash
@@ -71,7 +71,7 @@ jobs:
             -var 'aws_account_id=${{ vars.aws_account_id }}' \
             -auto-approve
         #-var 'iam_role=arn:aws:iam::${{ vars.aws_account_id }}:role/${{ vars.hub_iam_role }}' \
-        working-directory: ./time-tracking-app/ecr_infra
+        working-directory: vars.ecr_infra_path
 
       - name: Login to Amazon ECR
         id: login-ecr
