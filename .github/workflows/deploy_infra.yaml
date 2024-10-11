@@ -45,14 +45,14 @@ jobs:
             -backend-config='bucket=${{ vars.backend_s3_bucket }}' \
             -backend-config='key=timethief-app/terraform-infra.tfstate' \
             -backend-config='dynamodb_table=${{ vars.infra_dynamodb_table }}' \
-        working-directory: vars.infra_path
+        working-directory: ./time-tracking-app/infra
 
       - name: TF plan
         shell: bash
         run: |
           set -eux
           terraform plan
-        working-directory: vars.infra_path
+        working-directory: ./time-tracking-app/infra
 
   deploy:
     name: TF deploy
@@ -92,7 +92,7 @@ jobs:
             -backend-config='key=timethief-app/terraform-infra.tfstate' \
             -backend-config='dynamodb_table=${{ vars.infra_dynamodb_table }}' \
         #-backend-config='role_arn=arn:aws:iam::${{ vars.aws_account_id }}:role/${{ vars.backend_iam_role }}'
-        working-directory: vars.infra_path
+        working-directory: ./time-tracking-app/infra
 
       - name: TF apply
         shell: bash
@@ -100,4 +100,4 @@ jobs:
           set -eux
           terraform apply \
             -auto-approve
-        working-directory: vars.infra_path
+        working-directory: ./time-tracking-app/infra
