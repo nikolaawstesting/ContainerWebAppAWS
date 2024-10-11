@@ -86,7 +86,7 @@ variable "zone43_id" {
 variable "container_version" {
   description = "The version of the container"
   type        = string
-  default     = "6"
+  default     = "v7"
 }
 
 
