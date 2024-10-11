@@ -80,7 +80,7 @@ variable "repository_url" {
 variable "zone43_id" {
   description = "The Route53 zone ID"
   type        = string
-  default     = "Z3VQ1Q3Q2QZL6T"
+  default     = "Z04273732ECIZDWHL4OEF"
 }
 
 
