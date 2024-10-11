@@ -83,4 +83,10 @@ variable "zone43_id" {
   default     = "Z04273732ECIZDWHL4OEF"
 }
 
+variable "container_version" {
+  description = "The version of the container"
+  type        = string
+  default     = "6"
+}
+
 

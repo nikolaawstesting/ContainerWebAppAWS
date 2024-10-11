@@ -2,6 +2,10 @@ name: Docker image build and publish
 
 on:
   workflow_dispatch:
+   inputs:
+     image_tag:
+       description: 'Docker image tag'
+       required: true
 
 # concurrency required to avoid terraform lock contention during ECR provisioning
 concurrency: ci-${{ github.repository }}-docker-pipeline

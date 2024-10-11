@@ -68,6 +68,11 @@ variable "repository_url" {
     type        = string
 }
 
+variable "container_version" {
+    description = "The version of the container"
+    type        = string
+}
+
 
 resource "aws_ecs_cluster" "main" {
     name = "${var.environment}-${var.project_name}-ecs-cluster"
@@ -174,7 +179,7 @@ resource "aws_ecs_task_definition" "main" {
     container_definitions = jsonencode([
         {
             name      = "${var.environment}-${var.project_name}-container"
-            image     = "${var.repository_url}${var.github_org_name}_${var.github_repo_name}:current"
+            image     = "${var.repository_url}${var.github_org_name}_${var.github_repo_name}:${var.container_version}"
             essential = true
             portMappings = [
                 {
