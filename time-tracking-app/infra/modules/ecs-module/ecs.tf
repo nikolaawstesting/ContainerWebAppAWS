@@ -283,6 +283,216 @@ resource "aws_route53_record" "alb-record" {
 }
 
 
+
+
+resource "aws_iam_role" "ecs_task_execution_role_be_1" {
+    name = "${var.environment}-${var.project_name}-ecs-task-execution-role-be-1"
+
+    assume_role_policy = jsonencode({
+        Version = "2012-10-17"
+        Statement = [
+            {
+                Effect = "Allow"
+                Principal = {
+                    Service = "ecs-tasks.amazonaws.com"
+                }
+                Action = "sts:AssumeRole"
+            }
+        ]
+    })
+
+    managed_policy_arns = [
+        "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
+    ]
+}
+
+
+resource "aws_iam_role_policy" "ecs_task_execution_policy_be_1" {
+    name = "${var.environment}-${var.project_name}-ecs-task-execution-policy-be-1"
+    role = aws_iam_role.ecs_task_execution_role_be_1.id
+
+    policy = jsonencode({
+        Version = "2012-10-17"
+        Statement = [
+            {
+                Effect = "Allow"
+                Action = [
+                    "ecr:GetDownloadUrlForLayer",
+                    "ecr:BatchGetImage",
+                    "ecr:BatchCheckLayerAvailability",
+                    "logs:CreateLogGroup",
+                    "logs:CreateLogStream",
+                    "logs:PutLogEvents"
+                ]
+                Resource = "*"
+            }
+        ]
+    })
+}
+
+
+resource "aws_security_group" "fe_be_service_sg-1" {
+    name        = "${var.environment}-${var.project_name}-fe-be-sg-1"
+    description = "Security group for ECS service"
+    vpc_id      = var.vpc_id
+
+    ingress {
+        from_port   = 3000
+        to_port     = 3000
+        protocol    = "tcp"
+        security_groups = [aws_security_group.alb_service-sg.id]
+    }
+
+    egress {
+        from_port   = 0
+        to_port     = 0
+        protocol    = "-1"
+        cidr_blocks = ["0.0.0.0/0"]
+    }
+}
+
+
+resource "aws_security_group" "ecs_service-sg" {
+    name        = "${var.environment}-${var.project_name}-ecs-sg-01"
+    description = "Security group for ECS service"
+    vpc_id      = var.vpc_id
+
+    ingress {
+        from_port   = 8080
+        to_port     = 8080
+        protocol    = "tcp"
+        security_groups = [aws_security_group.alb_service-sg.id]
+    }
+
+    egress {
+        from_port   = 0
+        to_port     = 0
+        protocol    = "-1"
+        cidr_blocks = ["0.0.0.0/0"]
+    }
+}
+
+
+resource "aws_cloudwatch_log_group" "ecs" {
+    name              = "/ecs/${var.environment}-${var.project_name}"
+    retention_in_days = 1
+}
+
+
+resource "aws_ecs_cluster" "main" {
+    name = "${var.environment}-${var.project_name}-ecs-cluster"
+}
+
+resource "aws_ecs_task_definition" "main" {
+    family                   = "${var.environment}-${var.project_name}-task"
+    network_mode             = "awsvpc"
+    requires_compatibilities = ["FARGATE"]
+    cpu                      = "256"
+    memory                   = "512"
+
+    execution_role_arn = aws_iam_role.ecs_task_execution_role.arn
+
+    container_definitions = jsonencode([
+        {
+            name      = "${var.environment}-${var.project_name}-container"
+            image     = "${var.repository_url}${var.github_org_name}_${var.github_repo_name}:${var.container_version}"
+            essential = true
+            portMappings = [
+                {
+                    containerPort = 8080
+                    hostPort      = 8080
+                    protocol      = "tcp"
+                }
+            ]
+            logConfiguration = {
+                logDriver = "awslogs"
+                options = {
+                    "awslogs-group"         = aws_cloudwatch_log_group.ecs.name
+                    "awslogs-region"        = var.region
+                    "awslogs-stream-prefix" = "ecs"
+                }
+            }
+        }
+    ])
+}
+
+resource "aws_lb" "main" {
+    name               = "${var.environment}-${var.project_name}-alb"
+    internal           = false
+    load_balancer_type = "application"
+    security_groups    = [aws_security_group.alb_service-sg.id]
+    subnets            = var.public_subnet_ids
+}
+
+resource "aws_lb_target_group" "main" {
+    name     = "${var.environment}-${var.project_name}-tg"
+    port     = 8080
+    protocol = "HTTP"
+    vpc_id   = var.vpc_id
+    target_type = "ip"
+
+
+    health_check {
+        path                = "/"
+        protocol            = "HTTP"
+        matcher             = "200"
+        interval            = 30
+        timeout             = 5
+        healthy_threshold   = 2
+        unhealthy_threshold = 2
+    }
+}
+
+resource "aws_lb_listener" "main" {
+    load_balancer_arn = aws_lb.main.arn
+    port              = 443
+    protocol          = "HTTPS"
+    ssl_policy        = "ELBSecurityPolicy-2016-08"
+    certificate_arn   = var.certificate_arn
+    
+
+    default_action {
+        type             = "forward"
+        target_group_arn = aws_lb_target_group.main.arn
+    }
+}
+
+
+resource "aws_ecs_service" "main" {
+    name            = "${var.environment}-${var.project_name}-service"
+    cluster         = aws_ecs_cluster.main.id
+    task_definition = aws_ecs_task_definition.main.arn
+    desired_count   = 1
+    launch_type     = "FARGATE"
+
+    network_configuration {
+        subnets         = var.public_subnet_ids
+        security_groups = [aws_security_group.ecs_service-sg.id]
+        assign_public_ip = true
+    }
+
+    load_balancer {
+        target_group_arn = aws_lb_target_group.main.arn
+        container_name   = "${var.environment}-${var.project_name}-container"
+        container_port   = 8080
+        
+    }
+}
+
+
+resource "aws_route53_record" "alb-record" {
+  zone_id = var.zone43_id
+  name    = "www"
+  type    = "A"
+  alias {
+    name    = aws_lb.main.dns_name
+    zone_id = aws_lb.main.zone_id
+    evaluate_target_health = true
+  }
+}
+
+
+
 # resource "aws_vpc_endpoint" "s3" {
 #   vpc_id       = var.vpc_id
 #   service_name = "com.amazonaws.${var.region}.s3"
