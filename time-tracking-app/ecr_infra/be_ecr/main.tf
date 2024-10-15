@@ -21,7 +21,7 @@ locals {
 ###########################################################################
 
 resource "aws_ecr_repository" "timethief-ecr-be-1" {
-  name      = "${var.github_org_name}_${var.github_repo_name})_be_1"
+  name      = "${var.github_org_name}_${var.github_repo_name}_be_1"
   image_tag_mutability = "MUTABLE"
 
   image_scanning_configuration {
