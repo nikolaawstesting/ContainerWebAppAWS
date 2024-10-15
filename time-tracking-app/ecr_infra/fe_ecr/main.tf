@@ -20,8 +20,8 @@ locals {
 ###########################################################################
 ###########################################################################
 
-resource "aws_ecr_repository" "timethief-ecr-1" {
-  name      = "${var.github_org_name}_${var.github_repo_name}"
+resource "aws_ecr_repository" "timethief-ecr-fe-1" {
+  name      = "${var.github_org_name}_${var.github_repo_name}_fe_1"
   image_tag_mutability = "MUTABLE"
 
   image_scanning_configuration {
@@ -30,15 +30,15 @@ resource "aws_ecr_repository" "timethief-ecr-1" {
 }
 
 
-resource "aws_ecr_lifecycle_policy" "name" {
-  repository = aws_ecr_repository.timethief-ecr-1.name
+resource "aws_ecr_lifecycle_policy" "ecr-lifecycle-policy-fe-1" {
+  repository = aws_ecr_repository.timethief-ecr-fe-1.name
   policy     = templatefile(var.lifecycle_policy, {})
 }
 
 
-data "aws_iam_policy_document" "timethief-ecr-iam-document-1" {
+data "aws_iam_policy_document" "timethief-ecr-iam-document-fe-1" {
   statement {
-    sid    ="${var.environment}-${var.project_name}-ecr-iam-policy-1"
+    sid    ="${var.environment}-${var.project_name}-ecr-iam-policy-fe-1"
     effect = "Allow"
 
     principals {
@@ -65,11 +65,11 @@ data "aws_iam_policy_document" "timethief-ecr-iam-document-1" {
   }
 }
 
-resource "aws_ecr_repository_policy" "timethief-ecr-iam-policy-1" {
-  repository = aws_ecr_repository.timethief-ecr-1.name
-  policy     = data.aws_iam_policy_document.timethief-ecr-iam-document-1.json
+resource "aws_ecr_repository_policy" "timethief-ecr-iam-policy-fe-1" {
+  repository = aws_ecr_repository.timethief-ecr-fe-1.name
+  policy     = data.aws_iam_policy_document.timethief-ecr-iam-document-fe-1.json
 }
 
-output "ecr_repository_url" {
-  value = aws_ecr_repository.timethief-ecr-1.repository_url
+output "ecr_repository_url_fe" {
+  value = aws_ecr_repository.timethief-ecr-fe-1.repository_url
 }
