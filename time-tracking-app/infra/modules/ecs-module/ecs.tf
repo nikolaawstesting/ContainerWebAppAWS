@@ -76,8 +76,217 @@ variable "container_version" {
 ###########################################################################
 ###########################################################################
 
-resource "aws_iam_role" "ecs_task_execution_role" {
-    name = "${var.environment}-${var.project_name}-ecs-task-execution-role"
+# resource "aws_iam_role" "timethief-task-execution-role-ecs-fe-01" {
+#     name = "${var.environment}-${var.project_name}-task-execution-role-ecs-01"
+
+#     assume_role_policy = jsonencode({
+#         Version = "2012-10-17"
+#         Statement = [
+#             {
+#                 Effect = "Allow"
+#                 Principal = {
+#                     Service = "ecs-tasks.amazonaws.com"
+#                 }
+#                 Action = "sts:AssumeRole"
+#             }
+#         ]
+#     })
+
+#     managed_policy_arns = [
+#         "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
+#     ]
+# }
+
+
+# resource "aws_iam_role_policy" "timethief-task-execution-policy-ecs-fe-01" {
+#     name = "${var.environment}-${var.project_name}-task-execution-policy-ecs-fe-01"
+#     role = aws_iam_role.timethief-task-execution-role-ecs-fe-01.id
+
+#     policy = jsonencode({
+#         Version = "2012-10-17"
+#         Statement = [
+#             {
+#                 Effect = "Allow"
+#                 Action = [
+#                     "ecr:GetDownloadUrlForLayer",
+#                     "ecr:BatchGetImage",
+#                     "ecr:BatchCheckLayerAvailability",
+#                     "logs:CreateLogGroup",
+#                     "logs:CreateLogStream",
+#                     "logs:PutLogEvents"
+#                 ]
+#                 Resource = "*"
+#             }
+#         ]
+#     })
+# }
+
+
+# resource "aws_security_group" "timethief-sg-alb-fe-01" {
+#     name        = "${var.environment}-${var.project_name}-sg-alb-fe-01"
+#     description = "Security group for ALB/ECS frontend service"
+#     vpc_id      = var.vpc_id
+
+#     ingress {
+#         from_port   = 443
+#         to_port     = 443
+#         protocol    = "tcp"
+#         cidr_blocks = ["0.0.0.0/0"]
+#     }
+
+#     egress {
+#         from_port   = 0
+#         to_port     = 0
+#         protocol    = "-1"
+#         cidr_blocks = ["0.0.0.0/0"]
+#     }
+# }
+
+
+# resource "aws_security_group" "timethief-ecs-service-sg-fe-01" {
+#     name        = "${var.environment}-${var.project_name}-ecs-sg-fe-01"
+#     description = "Security group for ECS service"
+#     vpc_id      = var.vpc_id
+
+#     ingress {
+#         from_port   = 8080
+#         to_port     = 8080
+#         protocol    = "tcp"
+#         security_groups = [aws_security_group.timethief-sg-alb-fe-01.id]
+#     }
+
+#     egress {
+#         from_port   = 0
+#         to_port     = 0
+#         protocol    = "-1"
+#         cidr_blocks = ["0.0.0.0/0"]
+#     }
+# }
+
+
+# resource "aws_cloudwatch_log_group" "timethief-ecs-cw-log-group-fe-01" {
+#     name              = "/ecs/${var.environment}-${var.project_name}-ecs-cw-log-group-fe-01"
+#     retention_in_days = 1
+# }
+
+
+# resource "aws_ecs_cluster" "timethief-ecs-cluster-fe-01" {
+#     name = "${var.environment}-${var.project_name}-ecs-cluster-fe-01"
+# }
+
+# resource "aws_ecs_task_definition" "timethief-ecs-task-definition-fe-01" {
+#     family                   = "${var.environment}-${var.project_name}-ecs-task-definition-fe-01"
+#     network_mode             = "awsvpc"
+#     requires_compatibilities = ["FARGATE"]
+#     cpu                      = "256"
+#     memory                   = "512"
+
+#     execution_role_arn = aws_iam_role.timethief-task-execution-role-ecs-fe-01.arn
+
+#     container_definitions = jsonencode([
+#         {
+#             name      = "${var.environment}-${var.project_name}-container-fe-01"
+#             image     = "${ var.environment }-${ var.project_name }-ecr-fe-01:${var.container_version}"
+#             essential = true
+#             portMappings = [
+#                 {
+#                     containerPort = 8080
+#                     hostPort      = 8080
+#                     protocol      = "tcp"
+#                 }
+#             ]
+#             logConfiguration = {
+#                 logDriver = "awslogs"
+#                 options = {
+#                     "awslogs-group"         = aws_cloudwatch_log_group.timethief-ecs-cw-log-group-fe-01.name
+#                     "awslogs-region"        = var.region
+#                     "awslogs-stream-prefix" = "ecs-fe"
+#                 }
+#             }
+#         }
+#     ])
+# }
+
+# resource "aws_lb" "timethief-alb-fe-01" {
+#     name               = "${var.environment}-${var.project_name}-alb-fe-01"
+#     internal           = false
+#     load_balancer_type = "application"
+#     security_groups    = [aws_security_group.timethief-sg-alb-fe-01.id]
+#     subnets            = var.public_subnet_ids
+# }
+
+# resource "aws_lb_target_group" "timethief-alb-tg-fe-01" {
+#     name     = "${var.environment}-${var.project_name}-alb-tg-fe-01"
+#     port     = 8080
+#     protocol = "HTTP"
+#     vpc_id   = var.vpc_id
+#     target_type = "ip"
+
+
+#     health_check {
+#         path                = "/"
+#         protocol            = "HTTP"
+#         matcher             = "200"
+#         interval            = 30
+#         timeout             = 5
+#         healthy_threshold   = 2
+#         unhealthy_threshold = 2
+#     }
+# }
+
+# resource "aws_lb_listener" "timethief-alb-listener-fe-01" {
+#     load_balancer_arn = aws_lb.timethief-alb-fe-01.arn
+#     port              = 443
+#     protocol          = "HTTPS"
+#     ssl_policy        = "ELBSecurityPolicy-2016-08"
+#     certificate_arn   = var.certificate_arn
+    
+
+#     default_action {
+#         type             = "forward"
+#         target_group_arn = aws_lb_target_group.timethief-alb-tg-fe-01.arn
+#     }
+# }
+
+
+# resource "aws_ecs_service" "timethief-ecs-service-fe-01" {
+#     name            = "${var.environment}-${var.project_name}-ecs-service-fe-01"
+#     cluster         = aws_ecs_cluster.timethief-ecs-cluster-fe-01.id
+#     task_definition = aws_ecs_task_definition.timethief-ecs-task-definition-fe-01.arn
+#     desired_count   = 1
+#     launch_type     = "FARGATE"
+
+#     network_configuration {
+#         subnets         = var.public_subnet_ids
+#         security_groups = [aws_security_group.timethief-ecs-service-sg-fe-01.id]
+#         assign_public_ip = true
+#     }
+
+#     load_balancer {
+#         target_group_arn = aws_lb_target_group.timethief-alb-tg-fe-01.arn
+#         container_name   = "${var.environment}-${var.project_name}-container-fe-01"
+#         container_port   = 8080
+        
+#     }
+# }
+
+
+# resource "aws_route53_record" "timethief-alb-record-fe-01" {
+#   zone_id = var.zone43_id
+#   name    = "www"
+#   type    = "A"
+#   alias {
+#     name    = aws_lb.timethief-alb-fe-01.dns_name
+#     zone_id = aws_lb.timethief-alb-fe-01.zone_id
+#     evaluate_target_health = true
+#   }
+# }
+
+
+
+
+resource "aws_iam_role" "timethief-ecs-task-execution-role-be-01" {
+    name = "${var.environment}-${var.project_name}-ecs-task-execution-role-be-01"
 
     assume_role_policy = jsonencode({
         Version = "2012-10-17"
@@ -98,9 +307,9 @@ resource "aws_iam_role" "ecs_task_execution_role" {
 }
 
 
-resource "aws_iam_role_policy" "ecs_task_execution_policy" {
-    name = "${var.environment}-${var.project_name}-ecs-task-execution-policy"
-    role = aws_iam_role.ecs_task_execution_role.id
+resource "aws_iam_role_policy" "timethief-ecs-task-execution-policy-be-01" {
+    name = "${var.environment}-${var.project_name}-ecs-task-execution-policy-be-01"
+    role = aws_iam_role.timethief-ecs-task-execution-role-be-01.id
 
     policy = jsonencode({
         Version = "2012-10-17"
@@ -122,9 +331,10 @@ resource "aws_iam_role_policy" "ecs_task_execution_policy" {
 }
 
 
-resource "aws_security_group" "alb_service-sg" {
-    name        = "${var.environment}-${var.project_name}-alb-sg-01"
-    description = "Security group for ECS service"
+
+resource "aws_security_group" "timethief-sg-alb-be-01" {
+    name        = "${var.environment}-${var.project_name}-sg-alb-be-01"
+    description = "Security group for ALB/ECS frontend service"
     vpc_id      = var.vpc_id
 
     ingress {
@@ -143,196 +353,8 @@ resource "aws_security_group" "alb_service-sg" {
 }
 
 
-resource "aws_security_group" "ecs_service-sg" {
-    name        = "${var.environment}-${var.project_name}-ecs-sg-01"
-    description = "Security group for ECS service"
-    vpc_id      = var.vpc_id
-
-    ingress {
-        from_port   = 8080
-        to_port     = 8080
-        protocol    = "tcp"
-        security_groups = [aws_security_group.alb_service-sg.id]
-    }
-
-    egress {
-        from_port   = 0
-        to_port     = 0
-        protocol    = "-1"
-        cidr_blocks = ["0.0.0.0/0"]
-    }
-}
-
-
-resource "aws_cloudwatch_log_group" "ecs" {
-    name              = "/ecs/${var.environment}-${var.project_name}"
-    retention_in_days = 1
-}
-
-
-resource "aws_ecs_cluster" "main" {
-    name = "${var.environment}-${var.project_name}-ecs-cluster"
-}
-
-resource "aws_ecs_task_definition" "main" {
-    family                   = "${var.environment}-${var.project_name}-task"
-    network_mode             = "awsvpc"
-    requires_compatibilities = ["FARGATE"]
-    cpu                      = "256"
-    memory                   = "512"
-
-    execution_role_arn = aws_iam_role.ecs_task_execution_role.arn
-
-    container_definitions = jsonencode([
-        {
-            name      = "${var.environment}-${var.project_name}-container"
-            image     = "${var.repository_url}${var.github_org_name}_${var.github_repo_name}:${var.container_version}"
-            essential = true
-            portMappings = [
-                {
-                    containerPort = 8080
-                    hostPort      = 8080
-                    protocol      = "tcp"
-                }
-            ]
-            logConfiguration = {
-                logDriver = "awslogs"
-                options = {
-                    "awslogs-group"         = aws_cloudwatch_log_group.ecs.name
-                    "awslogs-region"        = var.region
-                    "awslogs-stream-prefix" = "ecs"
-                }
-            }
-        }
-    ])
-}
-
-resource "aws_lb" "main" {
-    name               = "${var.environment}-${var.project_name}-alb"
-    internal           = false
-    load_balancer_type = "application"
-    security_groups    = [aws_security_group.alb_service-sg.id]
-    subnets            = var.public_subnet_ids
-}
-
-resource "aws_lb_target_group" "main" {
-    name     = "${var.environment}-${var.project_name}-tg"
-    port     = 8080
-    protocol = "HTTP"
-    vpc_id   = var.vpc_id
-    target_type = "ip"
-
-
-    health_check {
-        path                = "/"
-        protocol            = "HTTP"
-        matcher             = "200"
-        interval            = 30
-        timeout             = 5
-        healthy_threshold   = 2
-        unhealthy_threshold = 2
-    }
-}
-
-resource "aws_lb_listener" "main" {
-    load_balancer_arn = aws_lb.main.arn
-    port              = 443
-    protocol          = "HTTPS"
-    ssl_policy        = "ELBSecurityPolicy-2016-08"
-    certificate_arn   = var.certificate_arn
-    
-
-    default_action {
-        type             = "forward"
-        target_group_arn = aws_lb_target_group.main.arn
-    }
-}
-
-
-resource "aws_ecs_service" "main" {
-    name            = "${var.environment}-${var.project_name}-service"
-    cluster         = aws_ecs_cluster.main.id
-    task_definition = aws_ecs_task_definition.main.arn
-    desired_count   = 1
-    launch_type     = "FARGATE"
-
-    network_configuration {
-        subnets         = var.public_subnet_ids
-        security_groups = [aws_security_group.ecs_service-sg.id]
-        assign_public_ip = true
-    }
-
-    load_balancer {
-        target_group_arn = aws_lb_target_group.main.arn
-        container_name   = "${var.environment}-${var.project_name}-container"
-        container_port   = 8080
-        
-    }
-}
-
-
-resource "aws_route53_record" "alb-record" {
-  zone_id = var.zone43_id
-  name    = "www"
-  type    = "A"
-  alias {
-    name    = aws_lb.main.dns_name
-    zone_id = aws_lb.main.zone_id
-    evaluate_target_health = true
-  }
-}
-
-
-
-
-resource "aws_iam_role" "ecs_task_execution_role_be_1" {
-    name = "${var.environment}-${var.project_name}-ecs-task-execution-role-be-1"
-
-    assume_role_policy = jsonencode({
-        Version = "2012-10-17"
-        Statement = [
-            {
-                Effect = "Allow"
-                Principal = {
-                    Service = "ecs-tasks.amazonaws.com"
-                }
-                Action = "sts:AssumeRole"
-            }
-        ]
-    })
-
-    managed_policy_arns = [
-        "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
-    ]
-}
-
-
-resource "aws_iam_role_policy" "ecs_task_execution_policy_be_1" {
-    name = "${var.environment}-${var.project_name}-ecs-task-execution-policy-be-1"
-    role = aws_iam_role.ecs_task_execution_role_be_1.id
-
-    policy = jsonencode({
-        Version = "2012-10-17"
-        Statement = [
-            {
-                Effect = "Allow"
-                Action = [
-                    "ecr:GetDownloadUrlForLayer",
-                    "ecr:BatchGetImage",
-                    "ecr:BatchCheckLayerAvailability",
-                    "logs:CreateLogGroup",
-                    "logs:CreateLogStream",
-                    "logs:PutLogEvents"
-                ]
-                Resource = "*"
-            }
-        ]
-    })
-}
-
-
-resource "aws_security_group" "fe_be_service_sg-1" {
-    name        = "${var.environment}-${var.project_name}-fe-be-sg-1"
+resource "aws_security_group" "timethief-ecs-service-sg-be-01" {
+    name        = "${var.environment}-${var.project_name}-ecs-sg-be-01"
     description = "Security group for ECS service"
     vpc_id      = var.vpc_id
 
@@ -340,7 +362,7 @@ resource "aws_security_group" "fe_be_service_sg-1" {
         from_port   = 3000
         to_port     = 3000
         protocol    = "tcp"
-        security_groups = [aws_security_group.alb_service-sg.id]
+        security_groups = [aws_security_group.timethief-sg-alb-be-01.id]
     }
 
     egress {
@@ -352,81 +374,60 @@ resource "aws_security_group" "fe_be_service_sg-1" {
 }
 
 
-resource "aws_security_group" "ecs_service-sg" {
-    name        = "${var.environment}-${var.project_name}-ecs-sg-01"
-    description = "Security group for ECS service"
-    vpc_id      = var.vpc_id
-
-    ingress {
-        from_port   = 8080
-        to_port     = 8080
-        protocol    = "tcp"
-        security_groups = [aws_security_group.alb_service-sg.id]
-    }
-
-    egress {
-        from_port   = 0
-        to_port     = 0
-        protocol    = "-1"
-        cidr_blocks = ["0.0.0.0/0"]
-    }
-}
-
-
-resource "aws_cloudwatch_log_group" "ecs" {
-    name              = "/ecs/${var.environment}-${var.project_name}"
+resource "aws_cloudwatch_log_group" "timethief-ecs-cw-log-group-be-01" {
+    name              = "/ecs/${var.environment}-${var.project_name}-ecs-cw-log-group-be-01"
     retention_in_days = 1
 }
 
 
-resource "aws_ecs_cluster" "main" {
-    name = "${var.environment}-${var.project_name}-ecs-cluster"
+resource "aws_ecs_cluster" "timethief-ecs-cluster-be-01" {
+    name = "${var.environment}-${var.project_name}-ecs-cluster-be-01"
 }
 
-resource "aws_ecs_task_definition" "main" {
-    family                   = "${var.environment}-${var.project_name}-task"
+resource "aws_ecs_task_definition" "timethief-ecs-task-definition-be-01" {
+    family                   = "${var.environment}-${var.project_name}-ecs-task-definition-be-01"
     network_mode             = "awsvpc"
     requires_compatibilities = ["FARGATE"]
     cpu                      = "256"
     memory                   = "512"
 
-    execution_role_arn = aws_iam_role.ecs_task_execution_role.arn
+    execution_role_arn = aws_iam_role.timethief-task-execution-role-ecs-be-01.arn
 
     container_definitions = jsonencode([
         {
-            name      = "${var.environment}-${var.project_name}-container"
-            image     = "${var.repository_url}${var.github_org_name}_${var.github_repo_name}:${var.container_version}"
+            name      = "${var.environment}-${var.project_name}-container-be-01"
+            image     = "${ var.environment }-${ var.project_name }-ecr-be-01:${var.container_version}"
             essential = true
             portMappings = [
                 {
-                    containerPort = 8080
-                    hostPort      = 8080
+                    containerPort = 3000
+                    hostPort      = 3000
                     protocol      = "tcp"
                 }
             ]
             logConfiguration = {
                 logDriver = "awslogs"
                 options = {
-                    "awslogs-group"         = aws_cloudwatch_log_group.ecs.name
+                    "awslogs-group"         = aws_cloudwatch_log_group.timethief-ecs-cw-log-group-be-01.name
                     "awslogs-region"        = var.region
-                    "awslogs-stream-prefix" = "ecs"
+                    "awslogs-stream-prefix" = "ecs-be"
                 }
             }
         }
     ])
 }
 
-resource "aws_lb" "main" {
-    name               = "${var.environment}-${var.project_name}-alb"
+resource "aws_lb" "timethief-alb-be-01" {
+    name               = "${var.environment}-${var.project_name}-alb-be-01"
     internal           = false
     load_balancer_type = "application"
-    security_groups    = [aws_security_group.alb_service-sg.id]
+    security_groups    = [aws_security_group.timethief-sg-alb-be-01.id]
     subnets            = var.public_subnet_ids
 }
 
-resource "aws_lb_target_group" "main" {
-    name     = "${var.environment}-${var.project_name}-tg"
-    port     = 8080
+resource "aws_lb_target_group" "timethief-alb-tg-be-01" {
+    name     = "${var.environment}-${var.project_name}-alb-tg-be-01"
+    port     = 3000
     protocol = "HTTP"
     vpc_id   = var.vpc_id
     target_type = "ip"
@@ -443,8 +444,8 @@ resource "aws_lb_target_group" "main" {
     }
 }
 
-resource "aws_lb_listener" "main" {
-    load_balancer_arn = aws_lb.main.arn
+resource "aws_lb_listener" "timethief-alb-listener-be-01" {
+    load_balancer_arn = aws_lb.timethief-alb-be-01.arn
     port              = 443
     protocol          = "HTTPS"
     ssl_policy        = "ELBSecurityPolicy-2016-08"
@@ -453,40 +454,40 @@ resource "aws_lb_listener" "main" {
 
     default_action {
         type             = "forward"
-        target_group_arn = aws_lb_target_group.main.arn
+        target_group_arn = aws_lb_target_group.timethief-alb-tg-be-01.arn
     }
 }
 
 
-resource "aws_ecs_service" "main" {
-    name            = "${var.environment}-${var.project_name}-service"
-    cluster         = aws_ecs_cluster.main.id
-    task_definition = aws_ecs_task_definition.main.arn
+resource "aws_ecs_service" "timethief-ecs-service-be-01" {
+    name            = "${var.environment}-${var.project_name}-ecs-service-be-01"
+    cluster         = aws_ecs_cluster.timethief-ecs-cluster-be-01.id
+    task_definition = aws_ecs_task_definition.timethief-ecs-task-definition-be-01.arn
     desired_count   = 1
     launch_type     = "FARGATE"
 
     network_configuration {
         subnets         = var.public_subnet_ids
-        security_groups = [aws_security_group.ecs_service-sg.id]
+        security_groups = [aws_security_group.timethief-ecs-service-sg-be-01.id]
         assign_public_ip = true
     }
 
     load_balancer {
-        target_group_arn = aws_lb_target_group.main.arn
-        container_name   = "${var.environment}-${var.project_name}-container"
-        container_port   = 8080
+        target_group_arn = aws_lb_target_group.timethief-alb-tg-be-01.arn
+        container_name   = "${var.environment}-${var.project_name}-container-be-01"
+        container_port   = 3000
         
     }
 }
 
 
-resource "aws_route53_record" "alb-record" {
+resource "aws_route53_record" "timethief-alb-record-be-01" {
   zone_id = var.zone43_id
   name    = "www"
   type    = "A"
   alias {
-    name    = aws_lb.main.dns_name
-    zone_id = aws_lb.main.zone_id
+    name    = aws_lb.timethief-alb-be-01.dns_name
+    zone_id = aws_lb.timethief-alb-be-01.zone_id
     evaluate_target_health = true
   }
 }

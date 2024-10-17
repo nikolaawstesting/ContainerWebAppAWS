@@ -16,41 +16,13 @@ variable "region" {
     default     = "eu-west-1"
 }
 
-variable backend_bucket_name {
-    description = "The name of the S3 bucket to store the Terraform state file"
-    type        = string
-    default    = "terraformtimethiefresources"
+variable "aws_account_id" {
+  description = "Target AWS Account ID"
+  type        = string
 }
 
 variable "assume_role_arn" {
   description = "The ARN of the role to assume"
   type        = string
   default     = "arn:aws:iam::054037132472:role/github-actions-role"
-}
-
-variable "lifecycle_policy" {
-  type        = string
-  description = "the lifecycle policy to be applied to the ECR repo"
-}
-
-variable "aws_account_id" {
-  description = "Target AWS Account ID"
-  type        = string
-}
-
-variable "github_org_name" {
-  description = "The name of the ECR repository"
-  type        = string
-  default = "nikolaawstesting"
-}
-
-variable "github_repo_name" {
-  description = "The name of the ECR repository"
-  type        = string
-  default = "containerwebappaws"
-}
-# used in build_image pipeline to hold github_org_name_github_repo_name value
-variable "repository_name" {
-  description = "The name of the ECR repository"
-  type        = string
 }

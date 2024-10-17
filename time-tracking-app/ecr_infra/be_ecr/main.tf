@@ -5,10 +5,6 @@ terraform {
       version = "~> 5.70.0"
     }
   }
-  backend "s3" {
-    bucket = "terraformtimethiefresources"
-    region = "eu-west-1"
-  }
 
 }
 data "aws_caller_identity" "current" {}
@@ -20,8 +16,8 @@ locals {
 ###########################################################################
 ###########################################################################
 
-resource "aws_ecr_repository" "timethief-ecr-be-1" {
-  name      = "${var.github_org_name}_${var.github_repo_name}_be_1"
+resource "aws_ecr_repository" "timethief-ecr-be-01" {
+  name      = "${var.environment}_${var.project_name}-ecr-be-01"
   image_tag_mutability = "MUTABLE"
 
   image_scanning_configuration {
@@ -30,15 +26,33 @@ resource "aws_ecr_repository" "timethief-ecr-be-1" {
 }
 
 
-resource "aws_ecr_lifecycle_policy" "ecr-lifecycle-policy-be-1" {
-  repository = aws_ecr_repository.timethief-ecr-be-1.name
-  policy     = templatefile(var.lifecycle_policy, {})
+resource "aws_ecr_lifecycle_policy" "timethief-ecr-lifecycle-policy-be-01" {
+  repository = aws_ecr_repository.timethief-ecr-be-01.name
+  policy     = <<EOF
+{
+    "rules": [
+      {
+        "rulePriority": 1,
+        "description": "Keep last 2 images",
+        "selection": {
+          "tagStatus": "tagged",
+          "tagPrefixList": [ "v" ],
+          "countType": "imageCountMoreThan",
+          "countNumber": 2
+        },
+        "action": {
+          "type": "expire"
+        }
+      }
+    ]
+ }
+EOF
 }
 
 
-data "aws_iam_policy_document" "timethief-ecr-iam-document-be-1" {
+data "aws_iam_policy_document" "timethief-ecr-iam-document-be-01" {
   statement {
-    sid    ="${var.environment}-${var.project_name}-ecr-iam-policy-be-1"
+    sid    ="${var.environment}-${var.project_name}-ecr-iam-policy-be-01"
     effect = "Allow"
 
     principals {
@@ -65,11 +79,11 @@ data "aws_iam_policy_document" "timethief-ecr-iam-document-be-1" {
   }
 }
 
-resource "aws_ecr_repository_policy" "timethief-ecr-iam-policy-1" {
-  repository = aws_ecr_repository.timethief-ecr-be-1.name
-  policy     = data.aws_iam_policy_document.timethief-ecr-iam-document-be-1.json
+resource "aws_ecr_repository_policy" "timethief-ecr-iam-policy-01" {
+  repository = aws_ecr_repository.timethief-ecr-be-01.name
+  policy     = data.aws_iam_policy_document.timethief-ecr-iam-document-be-01.json
 }
 
 output "ecr_repository_url_be" {
-  value = aws_ecr_repository.timethief-ecr-be-1.repository_url
+  value = aws_ecr_repository.timethief-ecr-be-01.repository_url
 }

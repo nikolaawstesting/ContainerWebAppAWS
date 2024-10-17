@@ -84,7 +84,7 @@ variable "container_version" {
 }
 
 variable "zone43_id" {
-  description = "The Route53 zone ID"
+  description = "The Route53 zone ID for the gonikola.com domain"
   type        = string
   default     = "Z04273732ECIZDWHL4OEF"
 }
