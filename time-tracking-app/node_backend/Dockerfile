@@ -4,7 +4,6 @@ WORKDIR /app
 COPY ./time-tracking-app/node_backend/package*.json ./
 RUN npm install
 COPY ./time-tracking-app/node_backend .
-RUN npm run build
 RUN npm prune --production
 
 FROM node:22-alpine
