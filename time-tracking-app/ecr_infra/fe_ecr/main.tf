@@ -5,8 +5,13 @@ terraform {
       version = "~> 5.70.0"
     }
   }
+  backend "s3" {
+  }
 
 }
+
+
+
 data "aws_caller_identity" "current" {}
 
 locals {
