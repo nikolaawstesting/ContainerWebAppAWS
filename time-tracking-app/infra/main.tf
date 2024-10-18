@@ -41,8 +41,6 @@ module "ecs" {
   ecr_repository_url = var.repository_url
   certificate_arn = var.certificate_arn
   zone43_id = var.zone43_id
-  github_org_name = var.github_org_name
-  github_repo_name = var.github_repo_name
   repository_url = var.repository_url
   container_version = var.container_version
 }

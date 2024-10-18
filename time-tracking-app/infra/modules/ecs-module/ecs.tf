@@ -53,16 +53,6 @@ variable "zone43_id" {
     type        = string
 }
 
-variable "github_org_name" {
-    description = "The name of the GitHub organization"
-    type        = string
-}
-
-variable "github_repo_name" {
-    description = "The name of the GitHub repository"
-    type        = string
-}
-
 variable "repository_url" {
     description = "The URL of the ECR repository"
     type        = string
@@ -535,7 +525,7 @@ resource "aws_route53_record" "timethief-alb-record-be-01" {
 #   service_name = "com.amazonaws.${var.region}.ecs-telemetry"
 #  vpc_endpoint_type = "Interface"
 #  private_dns_enabled = true
-#  security_group_ids = [aws_security_group.ecs_service-sg.id, aws_security_group.alb_service-sg.id]
+#  security_group_ids = [aws_security_group.ecs_service-sg.b.;.id, aws_security_group.alb_service-sg.id]
 #  subnet_ids = var.public_subnet_ids
 
 # }
@@ -552,15 +542,15 @@ resource "aws_route53_record" "timethief-alb-record-be-01" {
 
 output "ecs_cluster_id" {
     description = "The ID of the ECS cluster"
-    value       = aws_ecs_cluster.main.id
+    value       = aws_ecs_cluster.timethief-ecs-cluster-be-01.id
 }
 
 output "ecs_service_name" {
     description = "The name of the ECS service"
-    value       = aws_ecs_service.main.name
+    value       = aws_ecs_service.timethief-ecs-service-be-01.name
 }
 
 output "ecs_task_definition_arn" {
     description = "The ARN of the ECS task definition"
-    value       = aws_ecs_task_definition.main.arn
+    value       = aws_ecs_task_definition.timethief-ecs-task-definition-be-01.arn
 }
