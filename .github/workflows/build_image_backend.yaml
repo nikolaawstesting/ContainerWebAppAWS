@@ -67,7 +67,6 @@ jobs:
         run: |
           set -eux
           terraform apply \
-            -var 'repository_name=${{ env.ECR_REPO_NAME }}' \
             -var 'aws_account_id=${{ vars.aws_account_id }}' \
             -auto-approve
         #-var 'iam_role=arn:aws:iam::${{ vars.aws_account_id }}:role/${{ vars.hub_iam_role }}' \
