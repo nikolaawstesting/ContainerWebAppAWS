@@ -38,7 +38,6 @@ module "ecs" {
   private_subnet_ids = module.networking.private_subnet_ids
   public_route_table_id = module.networking.public_route_table_id
   default_route_table_id = module.networking.default_route_table_id
-  ecr_repository_url = var.repository_url
   certificate_arn = var.certificate_arn
   zone43_id = var.zone43_id
   repository_url = var.repository_url

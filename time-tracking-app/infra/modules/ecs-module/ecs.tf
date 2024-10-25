@@ -38,11 +38,6 @@ variable "default_route_table_id" {
     type        = string
 }
 
-variable "ecr_repository_url" {
-    description = "The URL of the ECR repository"
-    type        = string
-}
-
 variable "certificate_arn" {
     description = "The ARN of the ACM certificate"
     type        = string
@@ -386,7 +381,8 @@ resource "aws_ecs_task_definition" "timethief-ecs-task-definition-be-01" {
     container_definitions = jsonencode([
         {
             name      = "${var.environment}-${var.project_name}-container-be-01"
-            image     = "${ var.environment }-${ var.project_name }-ecr-be-01:${var.container_version}"
+            image     = "${ var.repository_url }${ var.environment }-${ var.project_name }-ecr-be-01:${var.container_version}"
+    
             essential = true
             portMappings = [
                 {
