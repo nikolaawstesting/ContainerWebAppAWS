@@ -420,7 +420,7 @@ resource "aws_lb_target_group" "timethief-alb-tg-be-01" {
 
 
     health_check {
-        path                = "/"
+        path                = "/ping"
         protocol            = "HTTP"
         matcher             = "200"
         interval            = 30
