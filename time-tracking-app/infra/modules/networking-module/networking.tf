@@ -80,7 +80,7 @@ resource "aws_route_table" "timethief-rt-public-01" {
 
 
 resource "aws_route_table_association" "timethief-assoc-public-01" {
-  count          = length(aws_subnet.public)
+  count          = length(aws_subnet.timethief-subnet-public-01)
   subnet_id      = aws_subnet.timethief-subnet-public-01[count.index].id
   route_table_id = aws_route_table.timethief-rt-public-01.id
 }

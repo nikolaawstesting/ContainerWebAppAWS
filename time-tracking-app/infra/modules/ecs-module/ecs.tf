@@ -381,7 +381,7 @@ resource "aws_ecs_task_definition" "timethief-ecs-task-definition-be-01" {
     cpu                      = "256"
     memory                   = "512"
 
-    execution_role_arn = aws_iam_role.timethief-task-execution-role-ecs-be-01.arn
+    execution_role_arn = aws_iam_role.timethief-ecs-task-execution-role-be-01.arn
 
     container_definitions = jsonencode([
         {
