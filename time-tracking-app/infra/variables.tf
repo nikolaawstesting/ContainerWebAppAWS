@@ -80,7 +80,7 @@ variable "repository_url" {
 variable "container_version" {
   description = "The version of the container"
   type        = string
-  default     = "v2"
+  default     = "v3"
 }
 
 variable "zone43_id" {
