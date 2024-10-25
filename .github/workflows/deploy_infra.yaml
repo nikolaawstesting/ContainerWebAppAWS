@@ -57,7 +57,7 @@ jobs:
   deploy:
     name: TF deploy
     needs: plan
-    if: github.ref == 'refs/heads/main'
+    #if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-24.04
 
     permissions:
