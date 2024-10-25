@@ -57,8 +57,7 @@ jobs:
             -backend-config='region=${{ vars.aws_region }}' \
             -backend-config='bucket=${{ vars.backend_s3_bucket }}' \
             -backend-config='key=tf/${{ env.ECR_REPO_NAME }}.tfstate' \
-            -backend-config='dynamodb_table=${{ vars.ecr_infra_dynamodb_table_fe }}' \
-            -backend-config='environment=${{ vars.environment_name }}' 
+            -backend-config='dynamodb_table=${{ vars.ecr_infra_dynamodb_table_fe }}' 
         #-backend-config='role_arn=arn:aws:iam::${{ vars.aws_account_id }}:role/${{ vars.backend_iam_role }}'
         working-directory: ./time-tracking-app/ecr_infra/fe_ecr
 
